@@ -3,7 +3,7 @@
 const assert = require('node:assert');
 const fs = require('node:fs');
 const path = require('node:path');
-const { extractToolNames, extractInject, scan, formatScan, discoverDirs, readPatchNames, resolveProfileDirs } = require('../lib/scan.js');
+const { extractToolNames, extractInject, scan, formatScan, discoverDirs, readPatchNames, resolveProfileDirs, hasCode } = require('../lib/scan.js');
 
 let passed = 0;
 const failures = [];
@@ -134,12 +134,46 @@ test('resolveProfileDirs maps names to folders and reports unresolved', () => {
   const home = path.join(root, 'resolve-home');
   fs.mkdirSync(path.join(home, 'profiles', 'desktop'), { recursive: true });
   fs.mkdirSync(path.join(home, 'plugins', 'alpha'), { recursive: true });
+  fs.writeFileSync(path.join(home, 'plugins', 'alpha', 'index.js'), 'module.exports = 1;', 'utf8');
   fs.writeFileSync(path.join(home, 'profiles', 'desktop', 'cordis.patch.yml'),
     '- name: alpha\n- name: ghost\n', 'utf8');
   const resolved = resolveProfileDirs(home, 'desktop');
   assert.strictEqual(resolved.dirs.length, 1);
   assert.ok(resolved.dirs[0].endsWith('alpha'));
   assert.deepStrictEqual(resolved.unresolved, ['ghost']);
+});
+
+
+test('hasCode rejects data-only dirs', () => {
+  const dataDir = path.join(root, 'data-only');
+  fs.mkdirSync(dataDir, { recursive: true });
+  fs.writeFileSync(path.join(dataDir, 'state.json'), '{}', 'utf8');
+  assert.strictEqual(hasCode(dataDir), false);
+  const codeDir = path.join(root, 'code-dir');
+  fs.mkdirSync(codeDir, { recursive: true });
+  fs.writeFileSync(path.join(codeDir, 'index.js'), 'module.exports = 1;', 'utf8');
+  assert.strictEqual(hasCode(codeDir), true);
+});
+
+test('profile resolution skips data dirs that share the plugin name', () => {
+  const home = path.join(root, 'data-home');
+  fs.mkdirSync(path.join(home, 'profiles', 'desktop'), { recursive: true });
+  fs.mkdirSync(path.join(home, 'dsh-purge'), { recursive: true });
+  fs.writeFileSync(path.join(home, 'dsh-purge', 'state.json'), '{}', 'utf8');
+  fs.mkdirSync(path.join(home, 'installs', 'dsh-purge-master', 'lib'), { recursive: true });
+  fs.writeFileSync(path.join(home, 'installs', 'dsh-purge-master', 'lib', 'index.js'), 'x', 'utf8');
+  fs.writeFileSync(path.join(home, 'profiles', 'desktop', 'cordis.patch.yml'), '- name: dsh-purge\n', 'utf8');
+  const resolved = resolveProfileDirs(home, 'desktop');
+  assert.strictEqual(resolved.dirs.length, 1);
+  assert.ok(resolved.dirs[0].includes('dsh-purge-master'));
+});
+
+test('empty tool dirs are reported as hollow', () => {
+  const empty = path.join(root, 'empty-plugin');
+  fs.mkdirSync(empty, { recursive: true });
+  const result = scan([one, empty]);
+  assert.deepStrictEqual(result.hollow, ['empty-plugin']);
+  assert.strictEqual(result.plugins.length, 1);
 });
 
 fs.rmSync(root, { recursive: true, force: true });
