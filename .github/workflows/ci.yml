@@ -21,3 +21,5 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Test
         run: node test/run.js
+        run: node test/scan.test.js
+        run: node cordis/selftest.mjs

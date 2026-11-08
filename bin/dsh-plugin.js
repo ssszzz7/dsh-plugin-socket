@@ -2,6 +2,7 @@
 'use strict';
 const { PluginManager } = require('../lib/plugins');
 const { doctor } = require('../lib/doctor');
+const { scan, discoverDirs, resolveProfileDirs, formatScan } = require('../lib/scan.js');
 
 const USAGE = `dsh-plugin — plugin socket for DSH
 
@@ -16,6 +17,7 @@ Commands:
                                 (--unsafe disables sandbox, --timeout MS)
   socket <name> [--port N]      Serve a plugin over JSON-over-TCP
   doctor [--dsh-root DIR]       Audit the real DSH profile (duplicate ids, missing plugins, tool budget)
+  scan [DIR...]             Static tool-name scan, duplicate + 128 budget report
   help                          Show this help
 
 Options:
@@ -30,6 +32,8 @@ function parse(argv) {
     if (a === '--home') out.flags.home = argv[++i];
     else if (a === '--port') out.flags.port = Number(argv[++i]);
     else if (a === '--timeout') out.flags.timeout = Number(argv[++i]);
+    else if (a === '--budget') out.flags.budget = Number(argv[++i]);
+    else if (a === '--profile') out.flags.profile = argv[++i];
     else if (a === '--unsafe') out.flags.unsafe = true;
     else if (a === '--json') out.flags.json = true;
     else if (a === '--dsh-root') out.flags['dsh-root'] = argv[++i];
@@ -101,6 +105,20 @@ function parse(argv) {
       return;
     }
 
+    case 'scan': {
+      let dirs = rest;
+  if (dirs.length === 0 && flags.profile) {
+    const dshRoot = flags['dsh-root'] || require('node:path').join(require('node:os').homedir(), '.dsh');
+    const resolved = resolveProfileDirs(dshRoot, flags.profile);
+    dirs = resolved.dirs;
+    if (resolved.unresolved.length) console.warn('解析不到：' + resolved.unresolved.join(', '));
+  }
+  if (dirs.length === 0) dirs = discoverDirs(flags.home);
+      const result = scan(dirs, { budget: flags.budget || undefined });
+      console.log(flags.json ? JSON.stringify(result, null, 2) : formatScan(result));
+      process.exitCode = result.risky ? 1 : 0;
+      break;
+    }
     case 'socket': {
       const name = rest[0];
       const handle = await pm.serve(name, { port: flags.port });

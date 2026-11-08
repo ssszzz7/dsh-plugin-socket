@@ -1,0 +1,8 @@
+# 把 dsh-plugin-socket 的监控壳挂进 DSH 插件链
+# 路径按你的实际克隆位置改
+- insert:
+    - name: ./cordis/index.js
+      config:
+        mode: observe   # observe 只看不改 / guard 冲突的第一个注册被丢弃 / rename 冲突的后来者改名
+        prefix: p_
+        log: true

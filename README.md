@@ -171,3 +171,36 @@ the trust boundary.
 ## License
 
 MIT
+
+## 静态扫描 `scan`
+
+工具名是写死的字面量（`ctx.tools.register({ name: "purge_status" })`），所以不用先把插件跑起来就能查冲突。
+
+```bash
+dsh-plugin scan                                  # 扫 ~/.dsh 下的全部插件目录
+dsh-plugin scan --profile desktop                # 只扫这个 profile 里启用中的插件
+dsh-plugin scan DIR1 DIR2 --budget 128 --json    # 指定目录 / 改预算 / 机器可读
+```
+
+输出内容：
+
+- 每个插件注册了多少工具名、几段 prompt、inject 了什么服务
+- **重名冲突**：两个不同插件注册同一个工具名（同一份插件的两份拷贝会被识别成「重复拷贝」并忽略，不算冲突）
+- **预算余量**：DeepSeek 单次请求上限 128 个工具，超了整轮对话直接失败
+- 两个以上插件都往 systemPrompt 里塞段落时给出提示（顺序取决于加载顺序）
+
+退出码：有风险 `1`，干净 `0`，方便进 CI。
+
+## cordis 壳 `cordis/`
+
+`scan` 只能抓静态重名。要在运行时真的兜住冲突，用 `cordis/index.js` —— 一个标准 cordis 插件，挂载后包住 `ctx.tools.register` 和 `ctx.systemPrompt.section`：
+
+| mode | 行为 |
+| --- | --- |
+| `observe` | 只记录：谁按什么顺序注册了什么、有没有撞名、prompt 段落顺序。不改任何行为 |
+| `guard` | 撞名时**丢弃后来者**的注册，并记账 |
+| `rename` | 撞名时把后来者改名成 `<prefix><name>`，两个都留下 |
+
+挂载方式见 `cordis/cordis.patch.yml`。挂上之后会多一个 `socket_report` 工具，随时把账本打出来。
+
+尚未覆盖：静态扫不到「A 插件改了 tools 数组 / B 插件调换 prompt 顺序」这类副作用，`observe` 能观察到顺序，但不会替你修。

@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-socket",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Plugin socket for DSH: one slot per plugin, capability-based sandbox, conflict detection, JSON-over-TCP IPC. 让 DSH 插件互不打架。",
   "keywords": [
     "dsh",
@@ -8,8 +8,8 @@
     "plugin",
     "plugin-manager",
     "sandbox",
-    "ipc",
-    "capability"
+    "cordis",
+    "tool-registry"
   ],
   "license": "MIT",
   "type": "commonjs",
@@ -29,7 +29,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "node test/run.js",
+    "test": "node test/run.js && node test/scan.test.js && node cordis/selftest.mjs",
     "demo": "node bin/dsh-plugin.js --home ./.demo-home install demo && node bin/dsh-plugin.js --home ./.demo-home list"
   },
   "repository": {
