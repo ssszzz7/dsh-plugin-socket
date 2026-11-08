@@ -1,0 +1,6 @@
+node_modules/
+.tmp/
+.demo-home/
+*.log
+.DS_Store
+Thumbs.db

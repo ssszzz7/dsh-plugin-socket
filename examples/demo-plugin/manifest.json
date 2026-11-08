@@ -1,0 +1,41 @@
+{
+  "name": "demo-plugin",
+  "version": "1.0.0",
+  "description": "Reference plugin for dsh-plugin-socket",
+  "entry": "index.js",
+  "api_version": "1.0",
+  "permissions": {
+    "fs_read": [
+      "PLUGINS_DIR/**"
+    ],
+    "fs_write": [
+      "PLUGIN_DIR/**"
+    ],
+    "socket": true,
+    "network": false,
+    "subprocess": false
+  },
+  "commands": {
+    "hello": {
+      "description": "Say hello"
+    },
+    "status": {
+      "description": "Report runtime info"
+    },
+    "echo": {
+      "description": "Echo arguments back"
+    },
+    "slow": {
+      "description": "Sleep N ms (timeout demo)"
+    }
+  },
+  "socket": {
+    "enabled": true,
+    "port": 0,
+    "protocol": "json"
+  },
+  "sandbox": {
+    "isolated": true,
+    "allow_env": []
+  }
+}
