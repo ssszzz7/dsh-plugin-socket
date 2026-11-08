@@ -20,6 +20,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Test
-        run: node test/run.js
-        run: node test/scan.test.js
-        run: node cordis/selftest.mjs
+        run: |
+          node test/run.js
+          node test/scan.test.js
+          node cordis/selftest.mjs
