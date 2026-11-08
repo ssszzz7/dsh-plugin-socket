@@ -1,5 +1,5 @@
 # 一键发布到 GitHub
-# 用法:  .\publish.ps1 -Repo dsh-plugin-socket [-User YOUR_NAME] [-Private]
+# 用法:  .\publish.ps1 -Repo dsh-plugin-socket [-User ssszzz7] [-Private]
 param(
   [string]$Repo = "dsh-plugin-socket",
   [string]$User = "",

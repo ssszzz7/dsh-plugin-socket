@@ -34,12 +34,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YOUR_NAME/dsh-plugin-socket.git"
+    "url": "git+https://github.com/ssszzz7/dsh-plugin-socket.git"
   },
   "bugs": {
-    "url": "https://github.com/YOUR_NAME/dsh-plugin-socket/issues"
+    "url": "https://github.com/ssszzz7/dsh-plugin-socket/issues"
   },
-  "homepage": "https://github.com/YOUR_NAME/dsh-plugin-socket#readme",
+  "homepage": "https://github.com/ssszzz7/dsh-plugin-socket#readme",
   "author": "YG",
   "os": [
     "win32",

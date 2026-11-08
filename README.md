@@ -2,7 +2,7 @@
 
 > **One slot per plugin.** A plugin manager for [DeepSeek Harness](https://github.com/deepseek-ai) that stops plugins from fighting each other: capability sandbox, cross-plugin conflict detection, and a JSON-over-TCP IPC surface.
 
-[![CI](https://github.com/YOUR_NAME/dsh-plugin-socket/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_NAME/dsh-plugin-socket/actions/workflows/ci.yml)
+[![CI](https://github.com/ssszzz7/dsh-plugin-socket/actions/workflows/ci.yml/badge.svg)](https://github.com/ssszzz7/dsh-plugin-socket/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
 
