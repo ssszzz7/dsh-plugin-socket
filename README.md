@@ -204,3 +204,19 @@ dsh-plugin scan DIR1 DIR2 --budget 128 --json    # 指定目录 / 改预算 / �
 挂载方式见 `cordis/cordis.patch.yml`。挂上之后会多一个 `socket_report` 工具，随时把账本打出来。
 
 尚未覆盖：静态扫不到「A 插件改了 tools 数组 / B 插件调换 prompt 顺序」这类副作用，`observe` 能观察到顺序，但不会替你修。
+
+## 一行安装（不经过 npm）
+
+Windows PowerShell：
+
+```powershell
+irm https://raw.githubusercontent.com/ssszzz7/dsh-plugin-socket/main/install.ps1 | iex
+```
+
+macOS / Linux：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ssszzz7/dsh-plugin-socket/main/install.sh | sh
+```
+
+脚本做的事：`git clone` 到 `~/dsh-plugin-socket`（已有则 `git pull`），往 PATH 里写一个 `dsh-plugin` 启动器，然后跑一次冒烟测试。可用 `DSH_SOCKET_HOME` / `DSH_SOCKET_BIN` 改目录。
