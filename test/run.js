@@ -120,7 +120,7 @@ async function run() {
     '  disabled: false',
     '- insert:',
     '    - id: ui-chat',
-    "      name: '@deepseek-ai/does-not-exist'",
+    "      name: 'ghost-plugin-does-not-exist'",
     '    - id: mcp-a',
     "      name: '@deepseek-ai/dsh-mcp-client'",
     '',

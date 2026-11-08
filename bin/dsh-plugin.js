@@ -107,14 +107,16 @@ function parse(argv) {
 
     case 'scan': {
       let dirs = rest;
+  let resolvedNames = undefined;
   if (dirs.length === 0 && flags.profile) {
     const dshRoot = flags['dsh-root'] || require('node:path').join(require('node:os').homedir(), '.dsh');
     const resolved = resolveProfileDirs(dshRoot, flags.profile);
     dirs = resolved.dirs;
+    resolvedNames = resolved.names;
     if (resolved.unresolved.length) console.warn('解析不到：' + resolved.unresolved.join(', '));
   }
   if (dirs.length === 0) dirs = discoverDirs(flags.home);
-      const result = scan(dirs, { budget: flags.budget || undefined });
+      const result = scan(dirs, { budget: flags.budget || undefined, names: resolvedNames });
       console.log(flags.json ? JSON.stringify(result, null, 2) : formatScan(result));
       process.exitCode = result.risky ? 1 : 0;
       break;
