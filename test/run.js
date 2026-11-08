@@ -110,7 +110,27 @@ async function run() {
   await handle.close();
   check('server closed', handle.server.listening === false);
 
-  // 8) manifest 校验
+  // 8) profile 体检
+  const { doctor: runDoctor } = require('../lib/doctor');
+  const fakeHome = path.join(TMP, 'fake-home');
+  const profDir = path.join(fakeHome, 'profiles', 'demo');
+  fs.mkdirSync(profDir, { recursive: true });
+  fs.writeFileSync(path.join(profDir, 'cordis.patch.yml'), [
+    '- id: ui-chat',
+    '  disabled: false',
+    '- insert:',
+    '    - id: ui-chat',
+    "      name: '@deepseek-ai/does-not-exist'",
+    '    - id: mcp-a',
+    "      name: '@deepseek-ai/dsh-mcp-client'",
+    '',
+  ].join('\n'));
+  const rep = runDoctor({ home: fakeHome, dshRoot: null });
+  check('doctor 检出重复 id', rep.issues.some((i) => i.kind === 'duplicate-id'));
+  check('doctor 检出解析不到的插件', rep.issues.some((i) => i.kind === 'missing-plugin'));
+  check('doctor 统计 MCP 数量', rep.profiles[0].mcpServers === 1, rep.profiles[0]);
+
+  // 9) manifest 校验
   check('invalid plugin name rejected', (() => { try { pm.install('Bad/Name'); return false; } catch { return true; } })());
 
   fs.rmSync(TMP, { recursive: true, force: true });

@@ -71,6 +71,24 @@ Conflicts:
 TCP 上按行分隔的 JSON。请求 `{"cmd":"hello","args":["YG"]}`，
 响应 `{"ok":true,"result":...}` 或 `{"ok":false,"error":...}`，单条上限 1MB。
 
+## 体检已有的 DSH 配置
+
+除了管自己的插件目录，`dsh-plugin doctor` 还会体检**你现有的 profile**：
+
+```bash
+dsh-plugin doctor
+# desktop: 24 条目 / 7 插入 / 8 禁用 / 3 个 MCP
+# 未发现静态冲突。
+```
+
+能查：重复 id（后一个静默覆盖前一个）、`name` 在 `node_modules` 里解析不到的插件
+（DSH 启动会 `ERR_MODULE_NOT_FOUND`）、声明了但没装上的依赖、以及 MCP 数量对
+128 工具上限的挤压。
+
+**说清楚边界**：doctor 查的是**静态**冲突。它查不出两个插件在运行时抢同一个全局变量，
+也管不了 `systemPrompt` 的注入顺序。不走 `dsh-plugin` 的插件（也就是你现在由 DSH 自己的
+cordis 加载器加载的全部插件）只被体检，不被沙箱约束。
+
 ## 安全模型（诚实说明）
 
 这是**能力沙箱**，不是硬隔离牢笼。能挡：越权 API、越界文件、环境变量泄露、`process.exit`。

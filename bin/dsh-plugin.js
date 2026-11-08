@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 const { PluginManager } = require('../lib/plugins');
+const { doctor } = require('../lib/doctor');
 
 const USAGE = `dsh-plugin — plugin socket for DSH
 
@@ -14,6 +15,7 @@ Commands:
   run <name> <cmd> [args...]    Invoke a command inside the sandbox
                                 (--unsafe disables sandbox, --timeout MS)
   socket <name> [--port N]      Serve a plugin over JSON-over-TCP
+  doctor [--dsh-root DIR]       Audit the real DSH profile (duplicate ids, missing plugins, tool budget)
   help                          Show this help
 
 Options:
@@ -30,6 +32,7 @@ function parse(argv) {
     else if (a === '--timeout') out.flags.timeout = Number(argv[++i]);
     else if (a === '--unsafe') out.flags.unsafe = true;
     else if (a === '--json') out.flags.json = true;
+    else if (a === '--dsh-root') out.flags['dsh-root'] = argv[++i];
     else out._.push(a);
   }
   return out;
@@ -80,6 +83,21 @@ function parse(argv) {
       const [name, command, ...args] = rest;
       const value = await pm.run(name, command, args, { unsafe: flags.unsafe, timeout: flags.timeout });
       print(value === undefined ? null : value);
+      return;
+    }
+
+    case 'doctor': {
+      const rep = doctor({ home: flags.home, dshRoot: flags['dsh-root'] });
+      if (json) return print(rep);
+      const lines = rep.profiles.map((p) => p.name + ': ' + p.entries + ' 条目 / ' + p.inserted + ' 插入 / ' + p.disabled + ' 禁用 / ' + p.mcpServers + ' 个 MCP');
+      if (rep.issues.length) {
+        lines.push('', '问题 (' + rep.issues.length + '):');
+        for (const i of rep.issues) lines.push('  [' + i.level + '/' + i.kind + '] ' + i.detail);
+      } else {
+        lines.push('', '未发现静态冲突。');
+      }
+      print(lines.join('\n'));
+      if (rep.issues.some((i) => i.level === 'error')) process.exitCode = 1;
       return;
     }
 

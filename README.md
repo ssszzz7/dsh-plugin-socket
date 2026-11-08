@@ -131,6 +131,27 @@ pm.conflicts();                                 // [{ level, kind, detail }]
 const handle = await pm.serve('my-plugin');     // { port, host, close }
 ```
 
+## Auditing a real DSH install
+
+`dsh-plugin` also ships a doctor for the *existing* profile — the plugins you already
+have, not just the ones this tool manages:
+
+```bash
+dsh-plugin doctor
+# desktop: 24 entries / 7 inserted / 8 disabled / 3 MCP servers
+# 问题 (0): 未发现静态冲突。
+```
+
+It reports duplicate entry ids (the later one silently wins), plugins whose `name`
+cannot be resolved in `node_modules` (DSH fails at startup with `ERR_MODULE_NOT_FOUND`),
+declared-but-not-installed dependencies, and the MCP server count against the
+128-tool request budget.
+
+**Scope, honestly:** the doctor finds *static* conflicts. It cannot detect two plugins
+patching the same global at runtime, nor reorder `systemPrompt` injections. Plugins that
+do not go through `dsh-plugin` (i.e. everything currently loaded by DSH's own cordis
+loader) are only audited, not sandboxed.
+
 ## Security model
 
 This is a **capability sandbox**, not a hardened jail. It stops accidents and
